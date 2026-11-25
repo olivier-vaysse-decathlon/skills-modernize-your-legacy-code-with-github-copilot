@@ -22,9 +22,10 @@ separate account records.
 - A debit is allowed only when the current balance is greater than or equal to
   the entered amount. Otherwise, the balance is unchanged and the program
   displays an insufficient-funds message.
-- The program does not validate transaction amounts as positive numbers.
-  Consequently, negative amounts are not rejected and can reverse the expected
-  effect of a credit or debit.
+- The program does not explicitly validate transaction amounts as positive
+  numbers. In the GNU COBOL runtime used to characterize this application,
+  entering `-25.00` in the unsigned amount field is treated as `25.00`: a
+  credit adds it, and a debit subtracts it.
 - The balance is held in working storage, not in a persistent store. It is
   shared by operations during a run, but resets to `1000.00` when the program
   starts again. There is no student identity, account selection, transaction
@@ -79,3 +80,23 @@ sequenceDiagram
     end
     Main->>User: Display goodbye message
 ```
+
+## Node.js implementation
+
+The consolidated Node.js application is in `src/accounting/index.js`. It keeps
+the same menu and balance behavior, represents amounts as integer cents, and
+starts each process with a balance of `1000.00`. Since the COBOL balance field
+is limited to `999999.99`, credits that exceed that limit are rejected without
+changing the balance. Amounts must be numeric with up to two decimal places;
+the sign is treated as positive to match the unsigned COBOL input behavior.
+
+Run it from the project root with:
+
+```bash
+cd src/accounting
+npm install
+npm start
+```
+
+The VS Code **Run and Debug** configuration is available in
+`.vscode/launch.json`.
